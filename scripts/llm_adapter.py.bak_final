@@ -332,7 +332,7 @@ class MockLLMAdapter(LLMAdapter):
                     )
 
                 lines.append(
-                    f"- {name} - {price_text}"
+                    f"• {name} — {price_text}"
                 )
 
                 shown += 1
@@ -389,7 +389,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the TONES Fashion "
                 "return and exchange policy:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -421,7 +421,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the current TONES Fashion "
                 "shipping information:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -453,7 +453,7 @@ class MockLLMAdapter(LLMAdapter):
                 "You can track your TONES Fashion order "
                 "using the available tracking service:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -507,7 +507,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the available TONES Fashion "
                 "payment information:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -550,7 +550,7 @@ class MockLLMAdapter(LLMAdapter):
                 return None
 
             currency = str(product.get("currency", "INR")).strip()
-            return f"{label}: {name} - {currency} {price:,.0f}."
+            return f"{label}: {name} — {currency} {price:,.0f}."
 
         # If the retrieval layer supplies a special operation, honor it.
         # The query-word fallback also keeps the mock adapter useful while
@@ -591,7 +591,7 @@ class MockLLMAdapter(LLMAdapter):
                     ).strip()
 
                     lines.append(
-                        f"- {name} - {currency} "
+                        f"• {name} — {currency} "
                         f"{minimum_price:,.0f}"
                     )
 
@@ -638,7 +638,7 @@ class MockLLMAdapter(LLMAdapter):
                     ).strip()
 
                     lines.append(
-                        f"- {name} - {currency} "
+                        f"• {name} — {currency} "
                         f"{maximum_price:,.0f}"
                     )
 
@@ -869,7 +869,7 @@ class MockLLMAdapter(LLMAdapter):
                         "Here is the TONES Fashion order cancellation "
                         "information:\n\n"
                         + "\n".join(
-                            f"- {fact}"
+                            f"• {fact}"
                             for fact in cancellation_facts
                         )
                     )
@@ -894,7 +894,7 @@ class MockLLMAdapter(LLMAdapter):
                         "Here is the available TONES "
                         "Fashion information:\n\n"
                         + "\n".join(
-                            f"- {fact}"
+                            f"• {fact}"
                             for fact in facts
                         )
                     )

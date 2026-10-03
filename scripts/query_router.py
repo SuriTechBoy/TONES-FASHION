@@ -113,6 +113,83 @@ def contains_term(query, term):
     )
 
 
+# ============================================================
+# SPECIAL INTENT DETECTION
+# ============================================================
+
+SPECIAL_INTENT_RULES = [
+    ("ORDER_STATUS", [
+        "what is my order status", "what's my order status",
+        "check my order status", "tell me my order status",
+        "my order status",
+    ]),
+    ("ORDER_TRACKING", [
+        "track my order", "track order", "order tracking",
+        "tracking my order", "where is my order", "where's my order",
+    ]),
+    ("ORDER_CANCELLATION", [
+        "cancel my order", "cancel the order", "cancel an order",
+        "can i cancel my order", "can i cancel the order",
+        "order cancellation",
+    ]),
+    ("RETURN_POLICY", [
+        "return policy", "can i return", "return a product",
+        "return the product", "return an item", "can i return an item",
+    ]),
+    ("EXCHANGE_POLICY", [
+        "exchange policy", "can i exchange", "exchange a product",
+        "exchange the product", "exchange an item",
+    ]),
+    ("CHEAPEST_PRODUCT", [
+        "cheapest product", "cheapest item", "lowest price product",
+        "lowest priced product", "least expensive product",
+        "least expensive item", "what is the cheapest", "what's the cheapest",
+    ]),
+    ("MOST_EXPENSIVE_PRODUCT", [
+        "most expensive product", "most expensive item",
+        "highest price product", "highest priced product",
+        "costliest product", "costliest item",
+    ]),
+    ("PRODUCTS_ON_SALE", [
+        "products on sale", "product on sale", "items on sale",
+        "what is on sale", "what's on sale",
+        "which products are on sale", "which items are on sale",
+        "sale products",
+    ]),
+    ("PRODUCT_FABRIC", [
+        "what is the fabric", "what's the fabric",
+        "what fabric is the product", "what fabric does the product use",
+        "fabric of the product", "material of the product",
+        "what is the material", "what's the material",
+    ]),
+    ("PRODUCT_SIZE", [
+        "what sizes are available", "which sizes are available",
+        "what size is available", "which size is available",
+        "available sizes", "what are the sizes", "what sizes do you have",
+    ]),
+    ("SHIPPING_POLICY", [
+        "shipping policy", "shipping", "delivery policy", "delivery time",
+        "how long does shipping take", "how long will shipping take",
+        "how long does delivery take", "do you deliver",
+        "do you deliver across india",
+    ]),
+    ("CONTACT_INFO", [
+        "how can i contact", "how do i contact",
+        "contact tones fashion", "contact tones", "contact details",
+        "customer support", "customer service",
+    ]),
+]
+
+
+def detect_special_intent(query):
+    """Detect a specific customer intent without changing existing routes."""
+    q = normalize(query)
+    for intent, phrases in SPECIAL_INTENT_RULES:
+        if any(phrase in q for phrase in phrases):
+            return intent
+    return None
+
+
 def route_query(query):
 
     q = normalize(query)
@@ -128,6 +205,8 @@ def route_query(query):
         for term in BUSINESS_TERMS
         if contains_term(q, term)
     ]
+
+    special_intent = detect_special_intent(q)
 
     # --------------------------------------------------------
     # Strong business intent
@@ -158,6 +237,7 @@ def route_query(query):
     ):
         return {
             "route": "BUSINESS",
+            "special_intent": special_intent,
             "product_hits": product_hits,
             "business_hits": business_hits,
         }
@@ -170,6 +250,7 @@ def route_query(query):
 
         return {
             "route": "MIXED",
+            "special_intent": special_intent,
             "product_hits": product_hits,
             "business_hits": business_hits,
         }
@@ -182,6 +263,7 @@ def route_query(query):
 
         return {
             "route": "PRODUCT",
+            "special_intent": special_intent,
             "product_hits": product_hits,
             "business_hits": business_hits,
         }
@@ -194,6 +276,7 @@ def route_query(query):
 
         return {
             "route": "BUSINESS",
+            "special_intent": special_intent,
             "product_hits": product_hits,
             "business_hits": business_hits,
         }
@@ -204,6 +287,7 @@ def route_query(query):
 
     return {
         "route": "GENERAL",
+        "special_intent": special_intent,
         "product_hits": [],
         "business_hits": [],
     }
@@ -225,6 +309,16 @@ if __name__ == "__main__":
         "black t shirt and can I return it",
         "tell me about TONES Fashion",
         "hello",
+        "What is the cheapest product you have?",
+        "Can I return a product?",
+        "Can I exchange a product?",
+        "Can I cancel my order?",
+        "What is my order status?",
+        "Can you track my order?",
+        "What is the fabric of the product?",
+        "What sizes are available?",
+        "Show me products that are on sale",
+        "How can I contact TONES Fashion?",
     ]
 
     print()
@@ -238,6 +332,7 @@ if __name__ == "__main__":
         print()
         print("QUERY:", query)
         print("ROUTE:", result["route"])
+        print("SPECIAL INTENT:", result.get("special_intent"))
         print(
             "PRODUCT HITS:",
             result["product_hits"]

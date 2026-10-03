@@ -5,8 +5,6 @@ from typing import Optional
 import logging
 import os
 from scripts.build_rag_context import build_rag_context
-from scripts.qa_7200_retrieval import find_qa_answer
-from scripts.structured_product_search import get_all_products
 
 from scripts.test_llm_answers import (
     SYSTEM_INSTRUCTIONS,
@@ -81,6 +79,7 @@ try:
         "provider=%s",
         llm_provider,
     )
+
 except Exception as exc:
 
     llm_service = None
@@ -179,10 +178,6 @@ def build_product_responses(
         context.get("special_intent", "")
     ).upper().strip()
 
-    aggregation_intent = str(
-        context.get("aggregation_intent", "")
-    ).upper().strip()
-
     special_operation = str(
         context.get("special_operation", "")
     ).upper().strip()
@@ -206,10 +201,6 @@ def build_product_responses(
     # --------------------------------------------------------
 
     if special_intent == "CHEAPEST_PRODUCT":
-
-        # Aggregation must scan the complete verified catalogue,
-        # not only the top semantic-retrieval results.
-        products = get_all_products()
 
         valid = []
 
@@ -247,10 +238,6 @@ def build_product_responses(
 
     elif special_intent == "MOST_EXPENSIVE_PRODUCT":
 
-        # Aggregation must scan the complete verified catalogue,
-        # not only the top semantic-retrieval results.
-        products = get_all_products()
-
         valid = []
 
         for product in products:
@@ -285,15 +272,7 @@ def build_product_responses(
     # PRODUCTS ON SALE
     # --------------------------------------------------------
 
-    elif (
-            special_intent == "PRODUCTS_ON_SALE"
-            or aggregation_intent == "PRODUCTS_ON_SALE"
-        ):
-        # Sale detection must scan the complete verified catalogue.
-        # The normal RAG context contains only top retrieval results,
-        # which can otherwise cause unrelated cards to leak through
-        # when no sale product is among those top results.
-        products = get_all_products()
+    elif special_intent == "PRODUCTS_ON_SALE":
 
         sale_products = []
 
@@ -512,29 +491,7 @@ def chat(request: ChatRequest):
             status_code=400,
             detail="Message cannot be empty.",
         )
-        # --------------------------------------------------------
-    # STEP 0: 7,200 VERIFIED CUSTOMER Q&A LOOKUP
-    # --------------------------------------------------------
 
-    qa_match = find_qa_answer(message)
-
-    if qa_match and qa_match.get("answer"):
-
-        logger.info(
-            "7,200-Q&A match | type=%s | score=%s | question=%s",
-            qa_match.get("match_type"),
-            qa_match.get("score"),
-            qa_match.get("question"),
-        )
-
-        return ChatResponse(
-            answer=str(
-                qa_match.get("answer")
-            ).strip(),
-            route="QA",
-            session_id=request.session_id,
-            products=[],
-        )
     # --------------------------------------------------------
     # CHECK LLM
     # --------------------------------------------------------
@@ -628,29 +585,6 @@ def chat(request: ChatRequest):
             products = build_product_responses(
                 context
             )
-
-            # ------------------------------------------------
-            # FINAL PRODUCT-CARD SAFETY GUARDS
-            # ------------------------------------------------
-
-            special_operation = str(
-                context.get("special_operation", "")
-            ).upper().strip()
-
-            special_intent = str(
-                context.get("special_intent", "")
-            ).upper().strip()
-
-            # Generic attribute questions must never receive
-            # arbitrary product cards.
-            #
-            # Sale filtering is already performed inside
-            # build_product_responses(), before ProductResponse
-            # objects are created. Do not re-filter those objects
-            # here because ProductResponse intentionally does not
-            # expose compare_at_price.
-            if special_operation == "PRODUCT_ATTRIBUTE_CLARIFICATION":
-                products = []
 
         # ----------------------------------------------------
         # LOG

@@ -172,19 +172,6 @@ class MockLLMAdapter(LLMAdapter):
             [],
         )
 
-        # Retrieval metadata supplied by the RAG context builder.
-        business_intent = str(
-            context.get("business_intent", "")
-        ).lower().strip()
-
-        special_operation = str(
-            context.get("special_operation", "")
-        ).upper().strip()
-
-        attribute_type = str(
-            context.get("attribute_type", "")
-        ).upper().strip()
-
         if not isinstance(
             products,
             list,
@@ -332,7 +319,7 @@ class MockLLMAdapter(LLMAdapter):
                     )
 
                 lines.append(
-                    f"- {name} - {price_text}"
+                    f"• {name} — {price_text}"
                 )
 
                 shown += 1
@@ -389,7 +376,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the TONES Fashion "
                 "return and exchange policy:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -421,7 +408,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the current TONES Fashion "
                 "shipping information:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -453,7 +440,7 @@ class MockLLMAdapter(LLMAdapter):
                 "You can track your TONES Fashion order "
                 "using the available tracking service:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -507,7 +494,7 @@ class MockLLMAdapter(LLMAdapter):
                 "Here is the available TONES Fashion "
                 "payment information:\n\n"
                 + "\n".join(
-                    f"- {fact}"
+                    f"• {fact}"
                     for fact in facts
                 )
             )
@@ -550,7 +537,7 @@ class MockLLMAdapter(LLMAdapter):
                 return None
 
             currency = str(product.get("currency", "INR")).strip()
-            return f"{label}: {name} - {currency} {price:,.0f}."
+            return f"{label}: {name} — {currency} {price:,.0f}."
 
         # If the retrieval layer supplies a special operation, honor it.
         # The query-word fallback also keeps the mock adapter useful while
@@ -560,42 +547,14 @@ class MockLLMAdapter(LLMAdapter):
                 p for p in products
                 if isinstance(p, dict) and numeric_price(p) is not None
             ]
-
             if valid:
-                minimum_price = min(
-                    numeric_price(product)
-                    for product in valid
+                cheapest = min(valid, key=numeric_price)
+                answer = one_product_answer(
+                    cheapest,
+                    "The cheapest product in the retrieved TONES Fashion catalog is",
                 )
-
-                cheapest_products = [
-                    product
-                    for product in valid
-                    if numeric_price(product) == minimum_price
-                ]
-
-                lines = [
-                    "The cheapest verified product(s) in the current "
-                    "TONES Fashion catalog are:"
-                ]
-
-                for product in cheapest_products:
-                    name = str(
-                        product.get(
-                            "title",
-                            product.get("name", "Unknown product")
-                        )
-                    ).strip()
-
-                    currency = str(
-                        product.get("currency", "INR")
-                    ).strip()
-
-                    lines.append(
-                        f"- {name} - {currency} "
-                        f"{minimum_price:,.0f}"
-                    )
-
-                return "\n".join(lines)
+                if answer:
+                    return answer
 
             return (
                 "I couldn't determine the cheapest product from the "
@@ -607,42 +566,14 @@ class MockLLMAdapter(LLMAdapter):
                 p for p in products
                 if isinstance(p, dict) and numeric_price(p) is not None
             ]
-
             if valid:
-                maximum_price = max(
-                    numeric_price(product)
-                    for product in valid
+                most_expensive = max(valid, key=numeric_price)
+                answer = one_product_answer(
+                    most_expensive,
+                    "The most expensive product in the retrieved TONES Fashion catalog is",
                 )
-
-                expensive_products = [
-                    product
-                    for product in valid
-                    if numeric_price(product) == maximum_price
-                ]
-
-                lines = [
-                    "The most expensive verified product(s) in the "
-                    "current TONES Fashion catalog are:"
-                ]
-
-                for product in expensive_products:
-                    name = str(
-                        product.get(
-                            "title",
-                            product.get("name", "Unknown product")
-                        )
-                    ).strip()
-
-                    currency = str(
-                        product.get("currency", "INR")
-                    ).strip()
-
-                    lines.append(
-                        f"- {name} - {currency} "
-                        f"{maximum_price:,.0f}"
-                    )
-
-                return "\n".join(lines)
+                if answer:
+                    return answer
 
             return (
                 "I couldn't determine the most expensive product from the "
@@ -678,26 +609,13 @@ class MockLLMAdapter(LLMAdapter):
 
         # Generic product-attribute questions need a product name before
         # an attribute can be answered safely.
-        if operation in {
-            "PRODUCT_FABRIC",
-            "PRODUCT_SIZE",
-            "PRODUCT_FIT",
-            "PRODUCT_MATERIAL",
-            "PRODUCT_ATTRIBUTE_CLARIFICATION",
-        }:
-
-            resolved_attribute = attribute_type or operation
-
+        if operation in {"PRODUCT_FABRIC", "PRODUCT_SIZE", "PRODUCT_FIT", "PRODUCT_MATERIAL"}:
             attribute = {
                 "PRODUCT_FABRIC": "fabric",
                 "PRODUCT_SIZE": "size",
                 "PRODUCT_FIT": "fit",
                 "PRODUCT_MATERIAL": "material",
-            }.get(
-                resolved_attribute,
-                "product",
-            )
-
+            }[operation]
             return (
                 f"Which TONES Fashion product would you like to know the "
                 f"{attribute} details for?"
@@ -830,55 +748,6 @@ class MockLLMAdapter(LLMAdapter):
 
                 return payment_answer()
 
-            # Order cancellation
-            #
-            # Cancellation information is already covered by the verified
-            # return/exchange knowledge. Reuse only the cancellation-related
-            # fact instead of returning unrelated shipping information.
-            if (
-                business_intent == "order_cancellation"
-                or "cancel my order" in query_lower
-                or "cancel order" in query_lower
-                or "cancellation" in query_lower
-            ):
-
-                cancellation_facts = []
-
-                for item in business_knowledge:
-
-                    if not isinstance(item, dict):
-                        continue
-
-                    facts = get_facts(item)
-
-                    for fact in facts:
-
-                        fact_lower = fact.lower()
-
-                        if (
-                            "orders can be cancelled" in fact_lower
-                            or (
-                                "cancel" in fact_lower
-                                and "dispatch" in fact_lower
-                            )
-                        ):
-                            cancellation_facts.append(fact)
-
-                if cancellation_facts:
-                    return (
-                        "Here is the TONES Fashion order cancellation "
-                        "information:\n\n"
-                        + "\n".join(
-                            f"- {fact}"
-                            for fact in cancellation_facts
-                        )
-                    )
-
-                return (
-                    "The current TONES Fashion knowledge states that "
-                    "orders can be cancelled only before dispatch."
-                )
-
             # Generic business fallback
             if business_knowledge:
 
@@ -894,7 +763,7 @@ class MockLLMAdapter(LLMAdapter):
                         "Here is the available TONES "
                         "Fashion information:\n\n"
                         + "\n".join(
-                            f"- {fact}"
+                            f"• {fact}"
                             for fact in facts
                         )
                     )

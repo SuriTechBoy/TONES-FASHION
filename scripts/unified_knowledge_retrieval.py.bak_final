@@ -446,7 +446,7 @@ def special_intent_retrieve(query, special_intent, product_top_k=10, business_to
             },
         }
 
-        lowered = query.lower().strip()
+        lowered = query.lower()
 
         product_reference_terms = (
             " t-shirt ", " tshirt ", " tee ", " shirt ",
@@ -459,87 +459,12 @@ def special_intent_retrieve(query, special_intent, product_top_k=10, business_to
             for term in product_reference_terms
         )
 
-        # A generic question must not return an arbitrary product.
+        # A generic "the product" is not enough to identify a product.
         generic_product_reference = (
-            lowered in {
-                "what is the fabric of the product?",
-                "what is the fabric of the product",
-                "what is the fabric of this product?",
-                "what is the fabric of this product",
-                "what fabric is the product?",
-                "what fabric is the product",
-                "what is the material of the product?",
-                "what is the material of the product",
-                "what sizes are available?",
-                "what sizes are available",
-                "what sizes are available for the product?",
-                "what sizes are available for the product",
-                "what sizes does the product have?",
-                "what sizes does the product have",
-                "product",
-                "the product",
-                "this product",
-                "a product",
-            }
+            "the product" in lowered
+            or "a product" in lowered
+            or "this product" in lowered
         )
-
-        # --------------------------------------------------------
-        # NAMED PRODUCT ATTRIBUTE QUERY
-        #
-        # Example:
-        # "What is the fabric of Daily Tees - black?"
-        #
-        # The product name itself can identify the product even
-        # when the query does not contain "tee", "shirt", etc.
-        # --------------------------------------------------------
-
-        attribute_prefixes = (
-            "what is the fabric of ",
-            "what is the material of ",
-            "what fabric is ",
-            "what material is ",
-            "fabric of ",
-            "material of ",
-            "what sizes are available for ",
-            "what sizes does ",
-            "sizes for ",
-        )
-
-        named_product_query = lowered
-
-        for prefix in attribute_prefixes:
-            if named_product_query.startswith(prefix):
-                named_product_query = named_product_query[len(prefix):]
-                break
-
-        named_product_query = named_product_query.strip(" ?")
-
-        if (
-            named_product_query
-            and not generic_product_reference
-        ):
-            try:
-                named_filters, named_matches = product_search(
-                    named_product_query,
-                    top_k=product_top_k,
-                )
-            except Exception:
-                named_filters, named_matches = {}, []
-
-            if named_matches:
-                return {
-                    "product_results": [
-                        {
-                            "score": score,
-                            "product": product,
-                        }
-                        for score, product in named_matches
-                    ],
-                    "business_results": [],
-                    "special_operation": "PRODUCT_ATTRIBUTE",
-                    "filters": named_filters,
-                    "attribute_type": special_intent,
-                }
 
         if not has_product_reference or generic_product_reference:
             return {

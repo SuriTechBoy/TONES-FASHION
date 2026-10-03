@@ -689,24 +689,6 @@ def get_sale_products(products_list=None):
 # SEARCH
 # ============================================================
 
-
-# ============================================================
-# FULL PRODUCT CATALOGUE ACCESS
-# ============================================================
-
-def get_all_products():
-    """
-    Return the complete structured product catalogue.
-
-    This is used for catalogue-wide operations such as:
-    - cheapest product
-    - most expensive product
-    - products on sale
-
-    Normal customer searches should continue using search().
-    """
-    return list(products)
-
 def search(query, top_k=10):
 
     filters = parse_query(query)

@@ -2,10 +2,7 @@ import json
 import re
 from pathlib import Path
 
-from scripts.structured_product_search import (
-    search as product_search,
-    get_all_products,
-)
+from scripts.structured_product_search import search as product_search
 from scripts.query_router import route_query
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -429,140 +426,16 @@ def special_intent_retrieve(query, special_intent, product_top_k=10, business_to
 
     # Product attribute questions
     if special_intent in ("PRODUCT_FABRIC", "PRODUCT_SIZE"):
-        # Generic attribute questions such as:
-        # "What is the fabric of the product?"
-        # "What sizes are available?"
-        # should not return arbitrary products.
-        #
-        # Only perform product retrieval when the customer query contains
-        # enough product-specific information to identify a product.
-
-        attribute_words = {
-            "PRODUCT_FABRIC": {
-                "fabric", "material", "cloth", "made of", "made from"
-            },
-            "PRODUCT_SIZE": {
-                "size", "sizes", "sizing"
-            },
-        }
-
-        lowered = query.lower().strip()
-
-        product_reference_terms = (
-            " t-shirt ", " tshirt ", " tee ", " shirt ",
-            " sweatshirt ", " kurta ", " cargo ",
-            " chino ", " jacket ", " product "
-        )
-
-        has_product_reference = any(
-            term in f" {lowered} "
-            for term in product_reference_terms
-        )
-
-        # A generic question must not return an arbitrary product.
-        generic_product_reference = (
-            lowered in {
-                "what is the fabric of the product?",
-                "what is the fabric of the product",
-                "what is the fabric of this product?",
-                "what is the fabric of this product",
-                "what fabric is the product?",
-                "what fabric is the product",
-                "what is the material of the product?",
-                "what is the material of the product",
-                "what sizes are available?",
-                "what sizes are available",
-                "what sizes are available for the product?",
-                "what sizes are available for the product",
-                "what sizes does the product have?",
-                "what sizes does the product have",
-                "product",
-                "the product",
-                "this product",
-                "a product",
-            }
-        )
-
-        # --------------------------------------------------------
-        # NAMED PRODUCT ATTRIBUTE QUERY
-        #
-        # Example:
-        # "What is the fabric of Daily Tees - black?"
-        #
-        # The product name itself can identify the product even
-        # when the query does not contain "tee", "shirt", etc.
-        # --------------------------------------------------------
-
-        attribute_prefixes = (
-            "what is the fabric of ",
-            "what is the material of ",
-            "what fabric is ",
-            "what material is ",
-            "fabric of ",
-            "material of ",
-            "what sizes are available for ",
-            "what sizes does ",
-            "sizes for ",
-        )
-
-        named_product_query = lowered
-
-        for prefix in attribute_prefixes:
-            if named_product_query.startswith(prefix):
-                named_product_query = named_product_query[len(prefix):]
-                break
-
-        named_product_query = named_product_query.strip(" ?")
-
-        if (
-            named_product_query
-            and not generic_product_reference
-        ):
-            try:
-                named_filters, named_matches = product_search(
-                    named_product_query,
-                    top_k=product_top_k,
-                )
-            except Exception:
-                named_filters, named_matches = {}, []
-
-            if named_matches:
-                return {
-                    "product_results": [
-                        {
-                            "score": score,
-                            "product": product,
-                        }
-                        for score, product in named_matches
-                    ],
-                    "business_results": [],
-                    "special_operation": "PRODUCT_ATTRIBUTE",
-                    "filters": named_filters,
-                    "attribute_type": special_intent,
-                }
-
-        if not has_product_reference or generic_product_reference:
-            return {
-                "product_results": [],
-                "business_results": [],
-                "special_operation": "PRODUCT_ATTRIBUTE_CLARIFICATION",
-                "filters": {},
-                "attribute_type": special_intent,
-            }
-
         filters, matches = product_search(query, top_k=product_top_k)
-
         product_results = [
             {"score": score, "product": product}
             for score, product in matches
         ]
-
         return {
             "product_results": product_results,
             "business_results": [],
             "special_operation": "PRODUCT_ATTRIBUTE",
             "filters": filters,
-            "attribute_type": special_intent,
         }
 
     # Business knowledge questions
@@ -586,156 +459,31 @@ def special_intent_retrieve(query, special_intent, product_top_k=10, business_to
     # Cancellation: use only whatever verified business knowledge
     # already exists; do not substitute another policy.
     if special_intent == "ORDER_CANCELLATION":
-        # Cancellation is already covered by the verified return/exchange
-        # knowledge. Reuse that canonical knowledge instead of performing
-        # broad business retrieval, which can surface unrelated shipping facts.
-
-        cancellation_results = business_search(
-            "cancel order before dispatch",
-            top_k=business_top_k,
-        )
-
-        filtered = []
-
-        for item in cancellation_results:
-            text_blob = str(item).lower()
-
-            if (
-                "cancel" in text_blob
-                or "dispatch" in text_blob
-            ):
-                filtered.append(item)
-
         return {
             "product_results": [],
-            "business_results": filtered,
+            "business_results": business_search(query, top_k=business_top_k),
             "special_operation": "BUSINESS_KNOWLEDGE",
             "business_intent": "order_cancellation",
         }
 
-    # Catalogue-wide product aggregation.
-    #
-    # IMPORTANT:
-    # Aggregation questions must NOT use normal top-K retrieval.
-    # They must operate over the complete structured catalogue.
-
+    # Product aggregation checkpoint. Dedicated MIN/MAX/sale
+    # operations will be added after retrieval is verified.
     if special_intent in (
         "CHEAPEST_PRODUCT",
         "MOST_EXPENSIVE_PRODUCT",
         "PRODUCTS_ON_SALE",
     ):
-
-        all_products = get_all_products()
-
-        valid_products = []
-
-        for product in all_products:
-
-            if not isinstance(product, dict):
-                continue
-
-            try:
-                price = float(product.get("price"))
-            except (TypeError, ValueError):
-                continue
-
-            valid_products.append(
-                (price, product)
-            )
-
-        # ----------------------------------------------------
-        # CHEAPEST PRODUCT
-        # ----------------------------------------------------
-
-        if special_intent == "CHEAPEST_PRODUCT":
-
-            if not valid_products:
-
-                matching_products = []
-
-            else:
-
-                minimum_price = min(
-                    price
-                    for price, _ in valid_products
-                )
-
-                matching_products = [
-                    product
-                    for price, product in valid_products
-                    if price == minimum_price
-                ]
-
-        # ----------------------------------------------------
-        # MOST EXPENSIVE PRODUCT
-        # ----------------------------------------------------
-
-        elif special_intent == "MOST_EXPENSIVE_PRODUCT":
-
-            if not valid_products:
-
-                matching_products = []
-
-            else:
-
-                maximum_price = max(
-                    price
-                    for price, _ in valid_products
-                )
-
-                matching_products = [
-                    product
-                    for price, product in valid_products
-                    if price == maximum_price
-                ]
-
-        # ----------------------------------------------------
-        # PRODUCTS ON SALE
-        # ----------------------------------------------------
-
-        else:
-
-            matching_products = []
-
-            for product in all_products:
-
-                if not isinstance(product, dict):
-                    continue
-
-                try:
-                    price = float(product.get("price"))
-                    compare_at_price = float(
-                        product.get("compare_at_price")
-                    )
-                except (TypeError, ValueError):
-                    continue
-
-                if compare_at_price > price:
-
-                    matching_products.append(
-                        product
-                    )
-
-            matching_products.sort(
-                key=lambda product: float(
-                    product.get("price")
-                )
-            )
-
+        filters, matches = product_search(query, top_k=product_top_k)
         product_results = [
-            {
-                "score": 100,
-                "product": product,
-            }
-            for product in matching_products
+            {"score": score, "product": product}
+            for score, product in matches
         ]
-
         return {
             "product_results": product_results,
             "business_results": [],
             "special_operation": "PRODUCT_AGGREGATION",
             "aggregation_intent": special_intent,
-            "filters": {},
+            "filters": filters,
         }
 
     return None
