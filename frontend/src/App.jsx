@@ -383,23 +383,100 @@ function Home({ onOpenAssistant }) {
   );
 }
 function ProductCard({ product }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
   return (
     <div className="product-card">
       <div className="product-image-placeholder">
-        <GarmentSvg type="tee" />
+        {product.image_url && !imageFailed ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="product-image"
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="product-image-fallback">
+            <GarmentSvg type="tee" />
+          </div>
+        )}
+
         <span className="product-image-badge">TONES</span>
       </div>
+
       <div className="product-card-content">
         <div className="product-title">{product.name}</div>
-        {product.price !== null && product.price !== undefined && <div className="product-price">₹{Number(product.price).toLocaleString("en-IN")}</div>}
+
+        {product.price !== null && product.price !== undefined && (
+          <div className="product-price">
+            ₹{Number(product.price).toLocaleString("en-IN")}
+          </div>
+        )}
+
         <div className="product-details">
-          {product.color && <div><span className="detail-label">Color:</span> {product.color}</div>}
-          {product.fit && <div><span className="detail-label">Fit:</span> {product.fit}</div>}
-          {product.fabric && <div><span className="detail-label">Fabric:</span> {product.fabric}</div>}
+          {product.color && (
+            <div>
+              <span className="detail-label">Color:</span> {product.color}
+            </div>
+          )}
+
+          {product.fit && (
+            <div>
+              <span className="detail-label">Fit:</span> {product.fit}
+            </div>
+          )}
+
+          {product.fabric && (
+            <div>
+              <span className="detail-label">Fabric:</span> {product.fabric}
+            </div>
+          )}
         </div>
-        {product.listed_sizes?.length > 0 && <div className="size-section"><div className="size-title">Listed sizes</div><div className="size-list">{product.listed_sizes.map((size) => <span key={size} className="size-pill">{size}</span>)}</div></div>}
-        {product.currently_in_stock_sizes?.length > 0 && <div className="stock-section"><div className="stock-title">Recorded in-stock sizes</div><div className="stock-list">{product.currently_in_stock_sizes.map((size) => <span key={size} className="stock-pill">{size}</span>)}</div><div className="stock-note">Based on the current knowledge snapshot. This is not live inventory.</div></div>}
-        <a href={product.url} target="_blank" rel="noreferrer" className="view-product-button">View Product ↗</a>
+
+        {product.listed_sizes?.length > 0 && (
+          <div className="size-section">
+            <div className="size-title">Listed sizes</div>
+
+            <div className="size-list">
+              {product.listed_sizes.map((size) => (
+                <span key={size} className="size-pill">
+                  {size}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {product.currently_in_stock_sizes?.length > 0 && (
+          <div className="stock-section">
+            <div className="stock-title">
+              Recorded in-stock sizes
+            </div>
+
+            <div className="stock-list">
+              {product.currently_in_stock_sizes.map((size) => (
+                <span key={size} className="stock-pill">
+                  {size}
+                </span>
+              ))}
+            </div>
+
+            <div className="stock-note">
+              Based on the current knowledge snapshot.
+              This is not live inventory.
+            </div>
+          </div>
+        )}
+
+        <a
+          href={product.url}
+          target="_blank"
+          rel="noreferrer"
+          className="view-product-button"
+        >
+          View Product ↗
+        </a>
       </div>
     </div>
   );

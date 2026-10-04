@@ -4,9 +4,43 @@ from pydantic import BaseModel, Field
 from typing import Optional
 import logging
 import os
+import json
+from pathlib import Path
 from scripts.build_rag_context import build_rag_context
 from scripts.qa_7200_retrieval import find_qa_answer
 from scripts.structured_product_search import get_all_products
+
+
+# ============================================================
+# TONES PRODUCT IMAGE INDEX
+# ============================================================
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+PRODUCT_IMAGE_INDEX_FILE = (
+    BASE_DIR / "03_STRUCTURED" / "product_image_index.json"
+)
+
+try:
+    with PRODUCT_IMAGE_INDEX_FILE.open(encoding="utf-8") as f:
+        PRODUCT_IMAGE_INDEX = json.load(f)
+except Exception as exc:
+    PRODUCT_IMAGE_INDEX = {}
+    logging.getLogger("tones-api").warning(
+        "Could not load product image index: %s", exc
+    )
+
+
+def get_product_image_url(product_id):
+    """Return the official TONES product image URL when available."""
+    if not product_id:
+        return None
+
+    record = PRODUCT_IMAGE_INDEX.get(str(product_id))
+
+    if isinstance(record, dict):
+        return record.get("image_url")
+
+    return None
 
 from scripts.test_llm_answers import (
     SYSTEM_INSTRUCTIONS,
@@ -136,6 +170,8 @@ class ProductResponse(BaseModel):
     listed_sizes: list[str] = []
 
     currently_in_stock_sizes: list[str] = []
+
+    image_url: Optional[str] = None
 
 
 # ============================================================
@@ -408,6 +444,10 @@ def build_product_responses(
                     for size in currently_in_stock_sizes
                     if size
                 ],
+
+                image_url=get_product_image_url(
+                    product.get("product_id")
+                ),
             )
         )
 
