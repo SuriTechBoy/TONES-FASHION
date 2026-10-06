@@ -18,11 +18,12 @@ const FEATURE_ITEMS = [
 ];
 
 const FLOATING_GARMENTS = [
-  { type: "tee", label: "TEE", className: "garment-one" },
-  { type: "hoodie", label: "HOODIE", className: "garment-two" },
-  { type: "shirt", label: "SHIRT", className: "garment-three" },
-  { type: "tee", label: "TEE", className: "garment-four" },
+  { image: "https://www.tonesfashion.com/cdn/shop/files/Main_4de729d4-17e8-4212-93cd-8056fe0694cb.jpg?v=1788264430", label: "THE ALPHA · TEE", className: "garment-one" },
+  { image: "https://www.tonesfashion.com/cdn/shop/files/Yellow_Main.jpg?v=1788264183", label: "THE FINAL ACT · TEE", className: "garment-two" },
+  { image: "https://www.tonesfashion.com/cdn/shop/files/Main_7.jpg?v=1789996422", label: "BLUE OXFORD · SHIRT", className: "garment-three" },
+  { image: "https://www.tonesfashion.com/cdn/shop/files/Green_Main_jpg.jpg?v=1790059169", label: "SAGE OXFORD · SHIRT", className: "garment-four" },
 ];
+
 
 function GarmentSvg({ type }) {
   if (type === "hoodie") {
@@ -72,316 +73,158 @@ function GarmentSvg({ type }) {
     </svg>
   );
 }
+const NEW_DROPS = [
+  { name: "Yellow Oxford Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/Main_11.jpg?v=1789996923", tag: "NEW DROP" },
+  { name: "Sage Oxford Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/Green_Main_jpg.jpg?v=1790059169", tag: "NEW DROP" },
+  { name: "Pink Oxford Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/Main_10.jpg?v=1789996819", tag: "NEW DROP" },
+  { name: "Light Blue Satin Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/light_blue_main_photo.jpg?v=1786970880", tag: "40% OFF" },
+  { name: "Burgundy Satin Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/Main_1_999a28e0-7b3b-412d-a8f9-4131740fac7b.jpg?v=1786628488", tag: "NEW DROP" },
+  { name: "Navy Blue Satin Shirt", price: "₹1,499", image: "https://www.tonesfashion.com/cdn/shop/files/Main_3_20c4fe30-6b20-42ae-a0fa-b896b7e29557.jpg?v=1786628708", tag: "NEW DROP" },
+];
+
+const CATEGORY_ITEMS = [
+  { title: "T-SHIRTS", subtitle: "Everyday essentials", image: "https://www.tonesfashion.com/cdn/shop/files/Main_4de729d4-17e8-4212-93cd-8056fe0694cb.jpg?v=1788264430" },
+  { title: "SHORT KURTAS", subtitle: "Modern Indian style", image: "https://www.tonesfashion.com/cdn/shop/files/Main_11.jpg?v=1789996923" },
+  { title: "SHIRTS", subtitle: "Sharp, relaxed, effortless", image: "https://www.tonesfashion.com/cdn/shop/files/Main_7.jpg?v=1789996422" },
+  { title: "SWEATSHIRTS", subtitle: "Easy layers", image: "https://www.tonesfashion.com/cdn/shop/files/Yellow_Main.jpg?v=1788264183" },
+  { title: "BOTTOM WEAR", subtitle: "Cargos, chinos & more", image: "https://www.tonesfashion.com/cdn/shop/files/Main_v1_jpg.jpg?v=1786970476" },
+];
+
+const STANDARD_ITEMS = [
+  ["01", "Fine fabric, sourced with care", "We choose the fabric before we choose the print."],
+  ["02", "Made with real love and attention", "Small-batch runs, not rushed off a line."],
+  ["03", "Designed to be comfortable", "Looks good, wears better."],
+  ["04", "Cut to fit your style, not just your size", "Regular, relaxed, oversized."],
+  ["05", "Built keeping the Indian man in mind", "Our climate, our bodies, our everyday."],
+  ["06", "Checked by hand before it ships", "Every piece inspected, not just sampled."],
+  ["07", "Made to outlast the season", "Built to stay in rotation, year after year."],
+];
+
+const COMMUNITY_IMAGES = [
+  "https://www.tonesfashion.com/cdn/shop/files/Main_4de729d4-17e8-4212-93cd-8056fe0694cb.jpg?v=1788264430",
+  "https://www.tonesfashion.com/cdn/shop/files/Main_7.jpg?v=1789996422",
+  "https://www.tonesfashion.com/cdn/shop/files/Green_Main_jpg.jpg?v=1790059169",
+  "https://www.tonesfashion.com/cdn/shop/files/Yellow_Main.jpg?v=1788264183",
+  "https://www.tonesfashion.com/cdn/shop/files/Main_10.jpg?v=1789996819",
+];
+
 function Home({ onOpenAssistant }) {
+  const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
   return (
     <div className="home-page">
-
-      {/* The video belongs ONLY to the opening hero section.
-          It must not cover the rest of the homepage. */}
       <div className="home-noise" />
 
-      {/* =====================================================
-          HERO SECTION — VIDEO BACKGROUND ONLY HERE
-          ===================================================== */}
+      {/* HERO — keep the existing Wear your vibe / Ask the AI experience */}
       <section className="hero-section">
-
-        <video
-          className="hero-background-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        >
-          <source src="/videos/tones-hero.mp4" type="video/mp4" />
+        <video className="hero-background-video" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+          <source src="/videos/tones-home-demo.mp4" type="video/mp4" />
         </video>
-
         <div className="hero-video-overlay" />
 
         <div className="hero-copy">
-
-          <div className="eyebrow">
-            <span className="eyebrow-dot" />
-            TONES FASHION · AI SHOPPING
-          </div>
-
-          <h1>
-            Wear your vibe.
-            <br />
-            <span>Ask the AI.</span>
-          </h1>
-
-          <p className="hero-description">
-            Discover TONES Fashion through a smarter shopping experience.
-            Ask for a style, colour, fit or budget — and let the assistant
-            find it.
-          </p>
-
+          <div className="eyebrow"><span className="eyebrow-dot" />TONES FASHION · AI SHOPPING</div>
+          <h1>Wear your vibe.<br /><span>Ask the AI.</span></h1>
+          <p className="hero-description">Discover TONES Fashion through a smarter shopping experience. Ask for a style, colour, fit or budget — and let the assistant find it.</p>
           <div className="hero-actions">
-
-            <button
-              className="primary-cta"
-              onClick={onOpenAssistant}
-            >
-              Open AI Assistant <span>↗</span>
-            </button>
-
-            <button
-              className="ghost-cta"
-              onClick={() =>
-                document
-                  .getElementById("features")
-                  ?.scrollIntoView({
-                    behavior: "smooth",
-                  })
-              }
-            >
-              Explore features ↓
-            </button>
-
+            <button className="primary-cta" onClick={onOpenAssistant}>Open AI Assistant <span>↗</span></button>
+            <button className="ghost-cta" onClick={() => scrollTo("new-drops")}>Explore the collection ↓</button>
           </div>
-
           <div className="hero-proof">
-
-            <div className="proof-item">
-              <strong>AI</strong>
-              <span>RAG powered</span>
-            </div>
-
-            <div className="proof-line" />
-
-            <div className="proof-item">
-              <strong>24/7</strong>
-              <span>Always ready</span>
-            </div>
-
-            <div className="proof-line" />
-
-            <div className="proof-item">
-              <strong>∞</strong>
-              <span>Natural queries</span>
-            </div>
-
+            <div className="proof-item"><strong>AI</strong><span>RAG powered</span></div><div className="proof-line" />
+            <div className="proof-item"><strong>24/7</strong><span>Always ready</span></div><div className="proof-line" />
+            <div className="proof-item"><strong>∞</strong><span>Natural queries</span></div>
           </div>
-
         </div>
 
-        {/* ===================================================
-            ANIMATED FASHION STAGE
-            =================================================== */}
-        <div
-          className="fashion-stage"
-          aria-label="Animated TONES Fashion garments"
-        >
-
-          <div className="stage-glow glow-a" />
-          <div className="stage-glow glow-b" />
-
-          <div className="orbit orbit-a" />
-          <div className="orbit orbit-b" />
-
-          <div className="stage-core">
-
-            <div className="core-ring" />
-
-            <div className="core-label">
-              TONES
-              <br />
-              <span>AI</span>
-            </div>
-
-          </div>
-
+        <div className="fashion-stage" aria-label="TONES Fashion product showcase">
+          <div className="stage-glow glow-a" /><div className="stage-glow glow-b" />
+          <div className="orbit orbit-a" /><div className="orbit orbit-b" />
+          <div className="stage-core"><div className="core-ring" /><div className="core-label">TONES<br /><span>AI</span></div></div>
           {FLOATING_GARMENTS.map((garment) => (
-            <div
-              className={`floating-garment ${garment.className}`}
-              key={garment.className}
-            >
-              <div className="garment-card">
-
-                <GarmentSvg type={garment.type} />
-
-                <span>{garment.label}</span>
-
-              </div>
+            <div className={`floating-garment ${garment.className}`} key={garment.className}>
+              <div className="garment-card"><img src={garment.image} alt={garment.label} className="real-garment-image" loading="eager" /><span>{garment.label}</span></div>
             </div>
           ))}
-
-          <div className="floating-chip chip-one">
-            BLACK · OVERSIZED
-          </div>
-
-          <div className="floating-chip chip-two">
-            UNDER ₹1000
-          </div>
-
-          <div className="floating-chip chip-three">
-            SMART SEARCH ✦
-          </div>
-
+          <div className="floating-chip chip-one">BLACK · OVERSIZED</div>
+          <div className="floating-chip chip-two">UNDER ₹1000</div>
+          <div className="floating-chip chip-three">SMART SEARCH ✦</div>
         </div>
-
       </section>
 
-      {/* =====================================================
-          MARQUEE
-          ===================================================== */}
-      <div
-        className="marquee-wrap"
-        aria-hidden="true"
-      >
-        <div className="marquee-track">
+      <div className="marquee-wrap" aria-hidden="true"><div className="marquee-track">{Array.from({ length: 2 }).flatMap((_, row) => ["NEW DROP", "AI SHOPPING", "TONES FASHION", "FIND YOUR FIT", "STYLE · SEARCH · DISCOVER"].map((t, i) => <span key={`${row}-${i}`}>{t} <b>✦</b></span>))}</div></div>
 
-          {Array.from({ length: 2 })
-            .flatMap((_, row) =>
-              [
-                "STREETWEAR",
-                "AI SHOPPING",
-                "TONES FASHION",
-                "FIND YOUR FIT",
-                "STYLE · SEARCH · DISCOVER",
-              ].map((text, i) => (
-                <span key={`${row}-${i}`}>
-                  {text} <b>✦</b>
-                </span>
-              ))
-            )}
-
+      {/* NEW DROP */}
+      <section className="shop-section" id="new-drops">
+        <div className="shop-section-heading">
+          <div><div className="eyebrow">FRESH FROM TONES</div><h2>New <span>Drop.</span></h2><p>Latest pieces from the current TONES Fashion collection.</p></div>
+          <button className="section-link" onClick={onOpenAssistant}>Shop with AI ↗</button>
         </div>
-      </div>
-
-      {/* =====================================================
-          FEATURES
-          ===================================================== */}
-      <section
-        className="feature-section"
-        id="features"
-      >
-
-        <div className="section-heading">
-
-          <div className="eyebrow">
-            WHY TONES AI
-          </div>
-
-          <h2>
-            More than a chatbot.
-            <br />
-            <span>A shopping companion.</span>
-          </h2>
-
-          <p>
-            The current MVP connects the customer-facing experience
-            to your existing FastAPI + RAG + Mock LLM stack.
-          </p>
-
+        <div className="product-showcase-grid">
+          {NEW_DROPS.map((item) => <article className="showcase-card" key={item.name}>
+            <div className="showcase-image"><img src={item.image} alt={item.name} loading="lazy" /><span>{item.tag}</span></div>
+            <div className="showcase-meta"><h3>{item.name}</h3><strong>{item.price}</strong></div>
+          </article>)}
         </div>
-
-        <div className="feature-grid">
-
-          {FEATURE_ITEMS.map((item, index) => (
-            <article
-              className="feature-card"
-              key={item.title}
-            >
-
-              <div className="feature-number">
-                0{index + 1}
-              </div>
-
-              <div className="feature-icon">
-                {item.icon}
-              </div>
-
-              <h3>
-                {item.title}
-              </h3>
-
-              <p>
-                {item.text}
-              </p>
-
-              <div className="feature-arrow">
-                ↗
-              </div>
-
-            </article>
-          ))}
-
-        </div>
-
       </section>
 
-      {/* =====================================================
-          DISCOVER / QUERY CLOUD
-          ===================================================== */}
-      <section className="discover-section">
-
-        <div className="discover-panel">
-
-          <div>
-
-            <div className="eyebrow">
-              TRY IT YOUR WAY
-            </div>
-
-            <h2>
-              From “black tee”
-              <br />
-              to <span>“find my fit.”</span>
-            </h2>
-
-            <p>
-              Natural language is the interface.
-              No filters to fight with. Just ask.
-            </p>
-
-          </div>
-
-          <div className="query-cloud">
-
-            {[
-              "Black oversized tee",
-              "Under ₹800",
-              "What sizes?",
-              "Return policy",
-              "COD?",
-              "Track my order",
-            ].map((q, i) => (
-              <button
-                key={q}
-                style={{ "--i": i }}
-                onClick={onOpenAssistant}
-              >
-                {q}
-              </button>
-            ))}
-
-          </div>
-
+      {/* CATEGORIES */}
+      <section className="categories-section" id="categories">
+        <div className="shop-section-heading centered-heading"><div><div className="eyebrow">SHOP BY CATEGORY</div><h2>Find your <span>lane.</span></h2></div></div>
+        <div className="category-grid">
+          {CATEGORY_ITEMS.map((item) => <button className="category-card" key={item.title} onClick={onOpenAssistant}>
+            <img src={item.image} alt={item.title} loading="lazy" /><div className="category-gradient" /><div className="category-copy"><small>{item.subtitle}</small><strong>{item.title}</strong><span>Explore ↗</span></div>
+          </button>)}
         </div>
-
       </section>
 
-      {/* =====================================================
-          FOOTER
-          ===================================================== */}
-      <footer className="home-footer">
+      {/* COMMUNITY */}
+      <section className="community-section">
+        <div className="community-header"><div><div className="eyebrow">TONESCLAN</div><h2>Real people.<br /><span>Real fits.</span></h2></div><div><p>Wear it your way. Tag <strong>@tones_fashion</strong> to get featured.</p><button className="dark-pill" onClick={() => scrollTo("footer")}>Join the community ↗</button></div></div>
+        <div className="community-strip">{COMMUNITY_IMAGES.map((image, i) => <div className="community-tile" key={`${image}-${i}`}><img src={image} alt="TONES Fashion community style" loading="lazy" /></div>)}</div>
+      </section>
 
-        <strong>
-          TONES Fashion AI
-        </strong>
+      {/* SHORT KURTAS / CASUALS */}
+      <section className="editorial-section">
+        <div className="editorial-heading"><div><div className="eyebrow">CURATED FOR YOU</div><h2>Short Kurtas<br /><span>& Casuals.</span></h2></div><button className="section-link" onClick={onOpenAssistant}>Find my fit ↗</button></div>
+        <div className="editorial-grid">
+          <article className="editorial-card"><img src="https://www.tonesfashion.com/cdn/shop/files/Main_10.jpg?v=1789996819" alt="Short Kurta style" loading="lazy" /><div><small>SHORT KURTAS</small><strong>Modern Indian, made easy.</strong><button onClick={onOpenAssistant}>Shop the edit ↗</button></div></article>
+          <article className="editorial-card"><img src="https://www.tonesfashion.com/cdn/shop/files/light_blue_main_photo.jpg?v=1786970880" alt="Casual shirt style" loading="lazy" /><div><small>CASUALS</small><strong>Relaxed pieces for everyday.</strong><button onClick={onOpenAssistant}>Shop the edit ↗</button></div></article>
+        </div>
+      </section>
 
-        <span>
-          RAG · Knowledge · Conversation
-        </span>
+      {/* CARGOS / ESSENTIALS */}
+      <section className="essentials-section">
+        <div className="essentials-panel"><div><div className="eyebrow">ESSENTIALS</div><h2>Cargos<br /><span>In Town.</span></h2><p>Easy utility, everyday comfort and a fit that stays in rotation.</p><button className="primary-cta" onClick={onOpenAssistant}>Ask AI for cargos ↗</button></div><div className="essential-image"><img src="https://www.tonesfashion.com/cdn/shop/files/Main_v1_jpg.jpg?v=1786970476" alt="TONES Fashion essential" loading="lazy" /></div></div>
+      </section>
 
+      {/* TONES STANDARD */}
+      <section className="standard-section" id="standard">
+        <div className="standard-heading"><div className="eyebrow">THE TONES STANDARD</div><h2>What goes into<br /><span>every TONES piece.</span></h2><p>Seven things we never compromise on. Made for Indian men.</p></div>
+        <div className="standard-list">{STANDARD_ITEMS.map(([number, title, text]) => <article className="standard-item" key={number}><span>{number}</span><div><h3>{title}</h3><p>{text}</p></div></article>)}</div>
+      </section>
+
+      {/* WHY TONES AI — preserved feature */}
+      <section className="feature-section" id="features">
+        <div className="section-heading"><div className="eyebrow">WHY TONES AI</div><h2>More than a chatbot.<br /><span>A shopping companion.</span></h2><p>The customer experience connects to the existing FastAPI + RAG + Mock LLM stack.</p></div>
+        <div className="feature-grid">{FEATURE_ITEMS.map((item, index) => <article className="feature-card" key={item.title}><div className="feature-number">0{index + 1}</div><div className="feature-icon">{item.icon}</div><h3>{item.title}</h3><p>{item.text}</p><div className="feature-arrow">↗</div></article>)}</div>
+      </section>
+
+      {/* TRY IT */}
+      <section className="discover-section" id="try-it"><div className="discover-panel"><div><div className="eyebrow">TRY IT YOUR WAY</div><h2>From “black tee”<br />to <span>“find my fit.”</span></h2><p>Natural language is the interface. No filters to fight with. Just ask.</p></div><div className="query-cloud">{["Black oversized tee", "Under ₹800", "What sizes?", "Return policy", "COD?", "Track my order"].map((q, i) => <button key={q} style={{ "--i": i }} onClick={onOpenAssistant}>{q}</button>)}</div></div></section>
+
+      {/* FOOTER */}
+      <footer className="home-footer" id="footer">
+        <div className="footer-brand"><strong>TONES</strong><span>FASHION AI</span><p>AI-powered shopping experience for TONES Fashion.</p></div>
+        <div className="footer-column"><h4>Explore</h4><button onClick={() => scrollTo("new-drops")}>New Drop</button><button onClick={() => scrollTo("categories")}>Categories</button><button onClick={() => scrollTo("standard")}>TONES Standard</button><button onClick={onOpenAssistant}>AI Assistant</button></div>
+        <div className="footer-column"><h4>TONES</h4><span>About Us</span><span>Contact</span><span>Returns & Exchange</span><span>Shipping</span></div>
+        <div className="footer-column"><h4>Built by STIF.AI</h4><p>AI product engineering, knowledge systems and intelligent customer experiences.</p><div className="social-links"><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a><a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a></div></div>
+        <div className="footer-bottom"><span>© 2026 TONES Fashion AI · Built with STIF.AI</span><span>RAG · Knowledge · Conversation</span></div>
       </footer>
-
     </div>
   );
 }
+
 function ProductCard({ product }) {
   const [imageFailed, setImageFailed] = useState(false);
 
